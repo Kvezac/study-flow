@@ -1,0 +1,142 @@
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==============================
+# Virtual environments
+# ==============================
+.venv/
+venv/
+ENV/
+env/
+.uv/
+
+# ==============================
+# Environment variables (секреты)
+# ==============================
+# .env.example НЕ игнорируем — его коммитим как шаблон
+.env
+.env.*
+!.env.example
+
+# ==============================
+# uv (package manager)
+# ==============================
+# ВАЖНО: uv.lock НЕ добавлять в .gitignore — его нужно коммитить
+# для воспроизводимых сборок[reference:0]
+.uv-cache/
+.uv_cache/
+*.uv.lock.bak
+
+# ==============================
+# FastAPI / Uvicorn
+# ==============================
+*.log
+logs/
+uvicorn.log
+instance/
+
+# ==============================
+# Testing / Coverage
+# ==============================
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# ==============================
+# mypy / ruff / type checking
+# ==============================
+.mypy_cache/
+.ruff_cache/
+
+# ==============================
+# Zed editor
+# ==============================
+.zed/
+
+# ==============================
+# Другие IDE / редакторы
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==============================
+# OS (macOS, Windows, Linux)
+# ==============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==============================
+# Jupyter
+# ==============================
+.ipynb_checkpoints
+
+# ==============================
+# Временные файлы
+# ==============================
+tmp/
+temp/
+
+# ==============================
+# SQLAlchemy / Databases
+# ==============================
+# Локальные базы данных (SQLite)
+*.db
+*.sqlite
+*.sqlite3
+test.db
+test_schema.db
+
+# Дампы и скрипты БД (если не являются частью миграций)
+*.sql
+*.dump
+
+# Служебные файлы SQLAlchemy
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ==============================
+# Alembic (миграции)
+# ==============================
+# Локальный конфиг (может содержать строку подключения с паролем)
+alembic.ini
+
+# Бинарные/кэш-файлы внутри папки миграций
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
