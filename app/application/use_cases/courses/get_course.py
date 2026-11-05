@@ -20,3 +20,4 @@ class GetCourseUseCase:
         if course is None:
             raise CourseNotFoundError("Course not found.")
         return course
+
