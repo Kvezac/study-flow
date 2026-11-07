@@ -1,7 +1,13 @@
 from collections.abc import AsyncIterator
+from typing import Annotated
 
 from fastapi import Depends
+from fastapi.security import HTTPBearer
 
+from app.application.interfaces.services.password_hasher import PasswordHasher
+from app.application.interfaces.services.token_service import TokenService
+from app.application.use_cases.auth.login_user import LoginUserUseCase
+from app.application.use_cases.auth.register_user import RegisterUserUseCase
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
 from app.application.use_cases.courses.get_course import GetCourseUseCase
 from app.application.use_cases.courses.get_course_structure import (
@@ -17,6 +23,10 @@ from app.application.use_cases.modules.update_module import UpdateModuleUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
+from app.infrastructure.security.jwt_token_service import JwtTokenService
+from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
+
+http_bearer = HTTPBearer(auto_error=False)
 
 
 async def get_uow() -> AsyncIterator[SqlAlchemyUnitOfWork]:
@@ -25,19 +35,19 @@ async def get_uow() -> AsyncIterator[SqlAlchemyUnitOfWork]:
 
 
 def get_get_courses_use_case(
-    uow: SqlAlchemyUnitOfWork = Depends(get_uow),
+    uow: Annotated[SqlAlchemyUnitOfWork, Depends(get_uow)],
 ) -> GetCoursesUseCase:
     return GetCoursesUseCase(course_repository=uow.courses)
 
 
 def get_get_course_use_case(
-    uow: SqlAlchemyUnitOfWork = Depends(get_uow),
+    uow: Annotated[SqlAlchemyUnitOfWork, Depends(get_uow)],
 ) -> GetCourseUseCase:
     return GetCourseUseCase(course_repository=uow.courses)
 
 
 def get_get_course_structure_use_case(
-    uow: SqlAlchemyUnitOfWork = Depends(get_uow),
+    uow: Annotated[SqlAlchemyUnitOfWork, Depends(get_uow)],
 ) -> GetCourseStructureUseCase:
     return GetCourseStructureUseCase(
         course_repository=uow.courses,
@@ -48,7 +58,7 @@ def get_get_course_structure_use_case(
 
 
 def get_get_lecture_use_case(
-    uow: SqlAlchemyUnitOfWork = Depends(get_uow),
+    uow: Annotated[SqlAlchemyUnitOfWork, Depends(get_uow)],
 ) -> GetLectureUseCase:
     return GetLectureUseCase(lecture_repository=uow.lectures)
 
@@ -90,4 +100,27 @@ def get_create_lecture_use_case() -> CreateLectureUseCase:
 def get_update_lecture_use_case() -> UpdateLectureUseCase:
     return UpdateLectureUseCase(
         uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory)
+    )
+
+
+def get_password_hasher() -> PasswordHasher:
+    return PwdlibPasswordHasher()
+
+
+def get_token_service() -> TokenService:
+    return JwtTokenService()
+
+
+def get_register_user_use_case() -> RegisterUserUseCase:
+    return RegisterUserUseCase(
+        uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
+        password_hasher=get_password_hasher(),
+    )
+
+
+def get_login_user_use_case() -> LoginUserUseCase:
+    return LoginUserUseCase(
+        uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
+        password_hasher=get_password_hasher(),
+        token_service=get_token_service(),
     )
