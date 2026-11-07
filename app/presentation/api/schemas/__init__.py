@@ -1,4 +1,5 @@
 from app.presentation.api.schemas.auth import (
+    CurrentUserResponse,
     LoginRequest,
     RegisteredUserResponse,
     RegisterUserRequest,
@@ -41,6 +42,7 @@ __all__ = [
     "CreateLectureRequest",
     "CreateModuleRequest",
     "CreateSectionRequest",
+    "CurrentUserResponse",
     "ErrorResponse",
     "LectureResponse",
     "LectureStructureResponse",

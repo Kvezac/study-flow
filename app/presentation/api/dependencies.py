@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
@@ -22,9 +22,14 @@ from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
+from app.domain.entities.user import User
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
-from app.infrastructure.security.jwt_token_service import JwtTokenService
+from app.infrastructure.security.jwt_token_service import (
+    InvalidTokenError,
+    JwtTokenService,
+)
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
+from app.presentation.exceptions import AuthenticationError, PermissionDeniedError
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -124,3 +129,36 @@ def get_login_user_use_case() -> LoginUserUseCase:
         password_hasher=get_password_hasher(),
         token_service=get_token_service(),
     )
+
+
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(http_bearer)],
+    uow: Annotated[SqlAlchemyUnitOfWork, Depends(get_uow)],
+    token_service: Annotated[TokenService, Depends(get_token_service)],
+) -> User:
+    print('credentials:', credentials, 'token_service:', token_service)
+    if credentials is None:
+        raise AuthenticationError("Authentication credentials were not provided.")
+
+    if credentials.scheme.lower() != "bearer":
+        raise AuthenticationError("Authentication scheme must be Bearer.")
+
+    try:
+        user_id = token_service.get_user_id(credentials.credentials)
+    except InvalidTokenError as exc:
+        raise AuthenticationError(str(exc)) from exc
+
+    user = await uow.users.get_by_id(user_id)
+    if user is None:
+        raise AuthenticationError("User from token was not found.")
+
+    return user
+
+
+async def get_current_admin(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    print('current_user:', current_user)
+    if not current_user.can_manage_platform():
+        raise PermissionDeniedError("Admin access is required.")
+    return current_user

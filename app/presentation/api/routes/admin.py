@@ -1,5 +1,5 @@
-from uuid import UUID
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 
@@ -40,6 +40,7 @@ from app.presentation.api.dependencies import (
     get_create_lecture_use_case,
     get_create_module_use_case,
     get_create_section_use_case,
+    get_current_admin,
     get_update_course_use_case,
     get_update_lecture_use_case,
     get_update_module_use_case,
@@ -61,7 +62,21 @@ from app.presentation.api.schemas import (
     UpdateSectionRequest,
 )
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter(
+    prefix="/admin",
+    tags=["Admin"],
+    dependencies=[Depends(get_current_admin)],
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "Admin access is required.",
+            "model": ErrorResponse,
+        },
+    },
+)
 
 
 @router.post(
