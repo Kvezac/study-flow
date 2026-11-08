@@ -31,3 +31,7 @@ class Section:
     def add_lecture(self, lecture_id: UUID) -> None:
         if lecture_id not in self.lecture_ids:
             self.lecture_ids.append(lecture_id)
+
+    def remove_lecture(self, lecture_id: UUID) -> None:
+        if lecture_id in self.lecture_ids:
+            self.lecture_ids.remove(lecture_id)

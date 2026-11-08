@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.interfaces.repositories.lecture_repository import LectureRepository
@@ -37,4 +37,13 @@ class SqlAlchemyLectureRepository(LectureRepository):
         model.title = lecture.title
         model.content = lecture.content
         model.position = lecture.position
+        await self.session.flush()
+
+    async def remove(self, lecture_ids: list[UUID]) -> None:
+        if not lecture_ids:
+            return
+        stmt = delete(LectureModel).where(
+            LectureModel.id.in_([str(item) for item in lecture_ids])
+        )
+        await self.session.execute(stmt)
         await self.session.flush()
